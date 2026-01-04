@@ -1,46 +1,3 @@
-const track = document.getElementById('photoStack');
-const slides = document.querySelectorAll('.slide');
-const totalSlides = slides.length;
-let currentIndex = 0;
-let autoSlideInterval;
-
-const AUTO_SLIDE_DELAY = 3000; // 3 seconds
-
-function updateSlidePosition() {
-    const translateX = -(currentIndex * 100);
-    track.style.transform = `translateX(${translateX}%)`;
-}
-
-function nextPhoto() {
-    currentIndex = (currentIndex + 1) % totalSlides;
-    updateSlidePosition();
-    resetTimer();
-}
-
-function prevPhoto() {
-    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-    updateSlidePosition();
-    resetTimer();
-}
-
-function startAutoSlide() {
-    autoSlideInterval = setInterval(nextPhoto, AUTO_SLIDE_DELAY);
-}
-
-function stopAutoSlide() {
-    clearInterval(autoSlideInterval);
-}
-
-function resetTimer() {
-    stopAutoSlide();
-    startAutoSlide();
-}
-
-document.querySelector('.stack-container').addEventListener('mouseenter', stopAutoSlide);
-document.querySelector('.stack-container').addEventListener('mouseleave', startAutoSlide);
-
-startAutoSlide();
-
 
 const Cart = {
     
@@ -49,17 +6,17 @@ const Cart = {
         return cartData ? JSON.parse(cartData) : [];
     },
 
-   
+    
     saveItems: function (items) {
         localStorage.setItem('travelCart', JSON.stringify(items));
         this.updateCartBadge();
     },
 
-   
+    
     addItem: function (item) {
         const items = this.getItems();
 
-      
+        
         const existingIndex = items.findIndex(i =>
             i.packageName === item.packageName && i.state === item.state
         );
@@ -82,7 +39,7 @@ const Cart = {
         return true;
     },
 
-   
+    
     removeItem: function (packageName, state) {
         let items = this.getItems();
         items = items.filter(item =>
@@ -92,7 +49,7 @@ const Cart = {
         this.renderCartItems();
     },
 
-   
+    
     clearCart: function () {
         localStorage.removeItem('travelCart');
         this.updateCartBadge();
@@ -105,7 +62,7 @@ const Cart = {
         return items.reduce((total, item) => total + parseInt(item.price), 0);
     },
 
-   
+    
     updateCartBadge: function () {
         const badge = document.querySelector('.cart-badge');
         const items = this.getItems();
@@ -168,7 +125,7 @@ const Cart = {
 
 
 const RatingSystem = {
-  
+    
     submitRating: function (packageName, state, rating) {
         return fetch('submit_rating.php', {
             method: 'POST',
@@ -210,7 +167,7 @@ const RatingSystem = {
             });
     },
 
-   
+    
     renderStars: function (rating, container) {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 >= 0.5;
@@ -229,7 +186,7 @@ const RatingSystem = {
         container.innerHTML = starsHTML;
     },
 
-   
+    
     renderInteractiveStars: function (container, packageName, state) {
         container.innerHTML = '';
         container.classList.add('interactive');
@@ -244,7 +201,7 @@ const RatingSystem = {
                 RatingSystem.submitRating(packageName, state, rating)
                     .then(data => {
                         alert(`Thank you for rating! Average: ${data.average_rating} stars (${data.total_ratings} ratings)`);
-                        
+                        // Update display
                         RatingSystem.loadAndDisplayRating(packageName, state);
                     })
                     .catch(error => {
@@ -278,7 +235,7 @@ const RatingSystem = {
         });
     },
 
-   
+    
     loadAndDisplayRating: function (packageName, state) {
         const ratingContainer = document.querySelector(`[data-package="${packageName}"][data-state="${state}"] .rating-display`);
         const ratingInfo = document.querySelector(`[data-package="${packageName}"][data-state="${state}"] .rating-info`);
@@ -302,7 +259,7 @@ const RatingSystem = {
 document.addEventListener('DOMContentLoaded', function () {
     console.log("Travel Explorer website scripts loaded successfully.");
 
-   
+    
     Cart.updateCartBadge();
 
    
@@ -317,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-   
+
     const cartIcon = document.querySelector('.cart-icon');
     if (cartIcon) {
         cartIcon.addEventListener('click', function () {
@@ -327,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-   
+    
     const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
     addToCartButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -338,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const price = priceText.match(/₹(\d+)/)?.[1] || '0';
             const daysText = priceText.match(/(\d+)\s*days?/)?.[1] || '';
 
-           
+            
             const pageTitle = document.querySelector('h1')?.textContent || '';
             const state = pageTitle.split(':')[0]?.trim() || 'Unknown';
 
@@ -350,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             if (Cart.addItem(item)) {
-               
+                
                 this.innerHTML = '<i class="fas fa-check"></i> Added!';
                 this.classList.add('btn-success');
                 this.classList.remove('btn-add-to-cart');
@@ -364,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-   
+    
     const checkoutBtn = document.getElementById('checkoutBtn');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', function () {
@@ -374,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-          
+           
             const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
             if (cartModal) cartModal.hide();
 
@@ -383,10 +340,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Payment Modal Logic (updated to handle cart and Razorpay)
+    
     const payNowBtn = document.getElementById('payNowBtn');
 
-    // Helper function to submit booking to backend
+    
     function submitBooking(bookingData, btn) {
         fetch('process_payment.php', {
             method: 'POST',
@@ -573,5 +530,4 @@ document.addEventListener('DOMContentLoaded', function () {
         const state = container.dataset.state;
         RatingSystem.renderInteractiveStars(container, packageName, state);
     });
-
 });
