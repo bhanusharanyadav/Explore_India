@@ -1,26 +1,65 @@
-// Custom JavaScript for Travel Explorer
+const track = document.getElementById('photoStack');
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentIndex = 0;
+let autoSlideInterval;
 
-// ========== CART MANAGEMENT SYSTEM ==========
+const AUTO_SLIDE_DELAY = 3000; // 3 seconds
 
-// Cart object to manage all cart operations
+function updateSlidePosition() {
+    const translateX = -(currentIndex * 100);
+    track.style.transform = `translateX(${translateX}%)`;
+}
+
+function nextPhoto() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    updateSlidePosition();
+    resetTimer();
+}
+
+function prevPhoto() {
+    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    updateSlidePosition();
+    resetTimer();
+}
+
+function startAutoSlide() {
+    autoSlideInterval = setInterval(nextPhoto, AUTO_SLIDE_DELAY);
+}
+
+function stopAutoSlide() {
+    clearInterval(autoSlideInterval);
+}
+
+function resetTimer() {
+    stopAutoSlide();
+    startAutoSlide();
+}
+
+document.querySelector('.stack-container').addEventListener('mouseenter', stopAutoSlide);
+document.querySelector('.stack-container').addEventListener('mouseleave', startAutoSlide);
+
+startAutoSlide();
+
+
 const Cart = {
-    // Get cart items from localStorage
+    
     getItems: function () {
         const cartData = localStorage.getItem('travelCart');
         return cartData ? JSON.parse(cartData) : [];
     },
 
-    // Save cart items to localStorage
+   
     saveItems: function (items) {
         localStorage.setItem('travelCart', JSON.stringify(items));
         this.updateCartBadge();
     },
 
-    // Add item to cart
+   
     addItem: function (item) {
         const items = this.getItems();
 
-        // Check if item already exists
+      
         const existingIndex = items.findIndex(i =>
             i.packageName === item.packageName && i.state === item.state
         );
@@ -43,7 +82,7 @@ const Cart = {
         return true;
     },
 
-    // Remove item from cart
+   
     removeItem: function (packageName, state) {
         let items = this.getItems();
         items = items.filter(item =>
@@ -53,20 +92,20 @@ const Cart = {
         this.renderCartItems();
     },
 
-    // Clear all items from cart
+   
     clearCart: function () {
         localStorage.removeItem('travelCart');
         this.updateCartBadge();
         this.renderCartItems();
     },
 
-    // Get total price
+   
     getTotalPrice: function () {
         const items = this.getItems();
         return items.reduce((total, item) => total + parseInt(item.price), 0);
     },
 
-    // Update cart badge counter
+   
     updateCartBadge: function () {
         const badge = document.querySelector('.cart-badge');
         const items = this.getItems();
@@ -76,7 +115,7 @@ const Cart = {
         }
     },
 
-    // Render cart items in modal
+    
     renderCartItems: function () {
         const cartItemsContainer = document.getElementById('cartItemsContainer');
         const cartTotal = document.getElementById('cartTotal');
@@ -126,10 +165,10 @@ const Cart = {
     }
 };
 
-// ========== RATING SYSTEM ==========
+
 
 const RatingSystem = {
-    // Submit rating
+  
     submitRating: function (packageName, state, rating) {
         return fetch('submit_rating.php', {
             method: 'POST',
@@ -152,7 +191,7 @@ const RatingSystem = {
             });
     },
 
-    // Get ratings for a package
+    
     getRating: function (packageName, state) {
         return fetch(`get_ratings.php?package_name=${encodeURIComponent(packageName)}&state=${encodeURIComponent(state)}`)
             .then(response => response.json())
@@ -171,7 +210,7 @@ const RatingSystem = {
             });
     },
 
-    // Render stars (display only)
+   
     renderStars: function (rating, container) {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 >= 0.5;
@@ -190,7 +229,7 @@ const RatingSystem = {
         container.innerHTML = starsHTML;
     },
 
-    // Render interactive stars (for rating submission)
+   
     renderInteractiveStars: function (container, packageName, state) {
         container.innerHTML = '';
         container.classList.add('interactive');
@@ -205,7 +244,7 @@ const RatingSystem = {
                 RatingSystem.submitRating(packageName, state, rating)
                     .then(data => {
                         alert(`Thank you for rating! Average: ${data.average_rating} stars (${data.total_ratings} ratings)`);
-                        // Update display
+                        
                         RatingSystem.loadAndDisplayRating(packageName, state);
                     })
                     .catch(error => {
@@ -239,7 +278,7 @@ const RatingSystem = {
         });
     },
 
-    // Load and display rating for a package
+   
     loadAndDisplayRating: function (packageName, state) {
         const ratingContainer = document.querySelector(`[data-package="${packageName}"][data-state="${state}"] .rating-display`);
         const ratingInfo = document.querySelector(`[data-package="${packageName}"][data-state="${state}"] .rating-info`);
@@ -258,15 +297,15 @@ const RatingSystem = {
     }
 };
 
-// ========== MAIN INITIALIZATION ==========
+
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log("Travel Explorer website scripts loaded successfully.");
 
-    // Initialize cart badge
+   
     Cart.updateCartBadge();
 
-    // Smooth Scroll for "Start Exploring" Button
+   
     const exploreBtn = document.getElementById('exploreBtn');
     if (exploreBtn) {
         exploreBtn.addEventListener('click', function (e) {
@@ -278,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Cart icon click handler
+   
     const cartIcon = document.querySelector('.cart-icon');
     if (cartIcon) {
         cartIcon.addEventListener('click', function () {
@@ -288,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Add to Cart buttons
+   
     const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
     addToCartButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -299,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const price = priceText.match(/₹(\d+)/)?.[1] || '0';
             const daysText = priceText.match(/(\d+)\s*days?/)?.[1] || '';
 
-            // Get state from page title
+           
             const pageTitle = document.querySelector('h1')?.textContent || '';
             const state = pageTitle.split(':')[0]?.trim() || 'Unknown';
 
@@ -311,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             if (Cart.addItem(item)) {
-                // Show success feedback
+               
                 this.innerHTML = '<i class="fas fa-check"></i> Added!';
                 this.classList.add('btn-success');
                 this.classList.remove('btn-add-to-cart');
@@ -325,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Checkout button in cart modal
+   
     const checkoutBtn = document.getElementById('checkoutBtn');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', function () {
@@ -335,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Close cart modal and open payment modal
+          
             const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
             if (cartModal) cartModal.hide();
 
@@ -534,4 +573,5 @@ document.addEventListener('DOMContentLoaded', function () {
         const state = container.dataset.state;
         RatingSystem.renderInteractiveStars(container, packageName, state);
     });
+
 });
