@@ -531,3 +531,50 @@ document.addEventListener('DOMContentLoaded', function () {
         RatingSystem.renderInteractiveStars(container, packageName, state);
     });
 });
+
+const track = document.getElementById('photoStack');
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentIndex = 0;
+let autoSlideInterval;
+
+// Configuration
+const AUTO_SLIDE_DELAY = 3000; // 3 seconds
+
+function updateSlidePosition() {
+    const translateX = -(currentIndex * 100);
+    track.style.transform = `translateX(${translateX}%)`;
+}
+
+function nextPhoto() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    updateSlidePosition();
+    resetTimer();
+}
+
+function prevPhoto() {
+    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    updateSlidePosition();
+    resetTimer();
+}
+
+function startAutoSlide() {
+    autoSlideInterval = setInterval(nextPhoto, AUTO_SLIDE_DELAY);
+}
+
+function stopAutoSlide() {
+    clearInterval(autoSlideInterval);
+}
+
+function resetTimer() {
+    stopAutoSlide();
+    startAutoSlide();
+}
+
+// Event Listeners
+document.querySelector('.stack-container').addEventListener('mouseenter', stopAutoSlide);
+document.querySelector('.stack-container').addEventListener('mouseleave', startAutoSlide);
+
+// Initialize
+startAutoSlide();
+
